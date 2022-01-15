@@ -24,14 +24,6 @@ float RoutePlanner::CalculateHValue(RouteModel::Node const *node) {
     return node->distance(*end_node);
 }
 
-
-// TODO 4: Complete the AddNeighbors method to expand the current node by adding all unvisited neighbors to the open list.
-// Tips:
-// - Use the FindNeighbors() method of the current_node to populate current_node.neighbors vector with all the neighbors.
-// - For each node in current_node.neighbors, set the parent, the h_value, the g_value. 
-// - Use CalculateHValue below to implement the h-Value calculation.
-// - For each node in current_node.neighbors, add the neighbor to open_list and set the node's visited attribute to true.
-
 void RoutePlanner::AddNeighbors(RouteModel::Node *current_node) {
     // first, populate the current node's neighbors vector
     current_node->FindNeighbors();
@@ -52,16 +44,27 @@ void RoutePlanner::AddNeighbors(RouteModel::Node *current_node) {
     }
 }
 
+// Return true for an f-value (i.e. g + h) for n1 > n2
+bool CompareNodes(RouteModel::Node* n1, RouteModel::Node* n2) {
+    return (n1->g_value + n1->h_value) > (n2->g_value + n2->h_value);
+}
 
-// TODO 5: Complete the NextNode method to sort the open list and return the next node.
-// Tips:
-// - Sort the open_list according to the sum of the h value and g value.
-// - Create a pointer to the node in the list with the lowest sum.
-// - Remove that node from the open_list.
-// - Return the pointer.
+// Sort a list of nodes in descending order comparing f-values.
+// This means the lowest cost (i.e. optimal node to visit) after
+// sorting would be the last one. 
+void SortOpenList(std::vector<RouteModel::Node*> *open) {
+    sort(open->begin(), open->end(), CompareNodes);
+}
 
 RouteModel::Node *RoutePlanner::NextNode() {
+    // sort the open list
+    SortOpenList(&open_list);
 
+    // get the optimal next node to visit (i.e. lowest f-value),
+    // remove it from the open list, and return a ptr to it
+    RouteModel::Node* current = open_list.back();
+    open_list.pop_back();
+    return current;
 }
 
 
