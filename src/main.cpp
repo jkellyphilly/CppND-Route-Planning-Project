@@ -27,6 +27,13 @@ static std::optional<std::vector<std::byte>> ReadFile(const std::string &path)
     return std::move(contents);
 }
 
+void ValidateGoodInput(float &input) {
+    while(input < 0 || input > 100) {
+        std::cout << "Sorry, must be between 0-100. Please try again: ";
+        std::cin >> input;
+    }
+}
+
 int main(int argc, const char **argv)
 {    
     std::string osm_data_file = "";
@@ -54,14 +61,24 @@ int main(int argc, const char **argv)
     
     // Collect user input for starting/ending points for search.
     float start_x, start_y, end_x, end_y;
+
     std::cout << "Please enter starting X coordinate: ";
     cin >> start_x;
+    ValidateGoodInput(start_x);
+
     std::cout << "Please enter starting Y coordinate: ";
     cin >> start_y;
+    ValidateGoodInput(start_y);
+
     std::cout << "Please enter ending X coordinate: ";
     cin >> end_x;
+    ValidateGoodInput(end_x);
+
     std::cout << "Please enter ending Y coordinate: ";
     cin >> end_y;
+    ValidateGoodInput(end_y);
+
+    std::cout << std::endl;
 
     // Build Model.
     RouteModel model{osm_data};
