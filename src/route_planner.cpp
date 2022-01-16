@@ -29,18 +29,21 @@ void RoutePlanner::AddNeighbors(RouteModel::Node *current_node) {
     current_node->FindNeighbors();
 
     // next, for each node in the current node's neighbors:
-    // 1. set the parent of the neighbor to the current node
-    // 2. set the h value (using CalculateHValue)
-    // 3. set the g value = current node's g value plus distance b/w current node
+    // 1) check to see if the neighbor has already been visited. only proceed if not
+    // 2) set the parent of the neighbor to the current node
+    // 3) set the h value (using CalculateHValue)
+    // 4) set the g value = current node's g value plus distance b/w current node
     //    and this neighbor
-    // 4. mark the neighbor as having been visited
-    // 5. add the neighbor to the open list of nodes
+    // 5) mark the neighbor as having been visited
+    // 6) add the neighbor to the open list of nodes
     for (auto nodeptr : current_node->neighbors) {
-        (*nodeptr).parent = current_node; 
-        (*nodeptr).h_value = RoutePlanner::CalculateHValue(nodeptr);
-        (*nodeptr).g_value = current_node->g_value + current_node->distance(*nodeptr);
-        (*nodeptr).visited = true;
-        open_list.emplace_back(nodeptr);
+        if (!nodeptr->visited) {
+            nodeptr->parent = current_node; 
+            nodeptr->h_value = RoutePlanner::CalculateHValue(nodeptr);
+            nodeptr->g_value = current_node->g_value + current_node->distance(*nodeptr);
+            nodeptr->visited = true;
+            open_list.emplace_back(nodeptr);
+        }
     }
 }
 
@@ -99,14 +102,6 @@ std::vector<RouteModel::Node> RoutePlanner::ConstructFinalPath(RouteModel::Node 
 
 }
 
-
-// TODO 7: Write the A* Search algorithm here.
-// Tips:
-// - Use the AddNeighbors method to add all of the neighbors of the current node to the open_list.
-// - Use the NextNode() method to sort the open_list and return the next node.
-// - When the search has reached the end_node, use the ConstructFinalPath method to return the final path that was found.
-// - Store the final path in the m_Model.path attribute before the method exits. This path will then be displayed on the map tile.
-
 void RoutePlanner::AStarSearch() {
     RouteModel::Node *current_node = nullptr;
 
@@ -120,4 +115,23 @@ void RoutePlanner::AStarSearch() {
     // put current node into open list
     open_list.emplace_back(current_node);
 
+    // while the open list isn't empty, 
+    // 1) sort the open list and return the next node with NextNode()
+    // 2) check to see if the optimal node is the goal. if it is, set the model's
+    //    path with the ConstructFinalPath method and break out
+    // 3) if we aren't at the goal, set the current node's visited attribute to true
+    //    and populate the open_list vector with its neighbors through AddNeighbors method
+    while(!open_list.empty()) 
+    {
+        current_node = RoutePlanner::NextNode();
+
+        // goal check
+        if (current_node == end_node) {
+            m_Model.path = RoutePlanner::ConstructFinalPath(current_node);
+            break;
+        }
+
+        current_node->visited = true;
+        RoutePlanner::AddNeighbors(current_node);
+    }
 }
