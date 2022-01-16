@@ -110,6 +110,14 @@ std::vector<RouteModel::Node> RoutePlanner::ConstructFinalPath(RouteModel::Node 
 void RoutePlanner::AStarSearch() {
     RouteModel::Node *current_node = nullptr;
 
-    // TODO: Implement your solution here.
+    // first, set current_node to the start_node
+    // and fill out its properties
+    current_node = start_node;
+    current_node->g_value = 0;
+    current_node->h_value = RoutePlanner::CalculateHValue(current_node);
+    current_node->parent = nullptr;
+
+    // put current node into open list
+    open_list.emplace_back(current_node);
 
 }
